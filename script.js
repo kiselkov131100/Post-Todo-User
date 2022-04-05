@@ -4,9 +4,21 @@ let posts = null;
 let todos = null;
 let users = null;
 
-const renderLoading = () => {};
+let postsLimit = 5;
+let postsFilterValue = "";
+let activeTab = "";
 
-const renderError = () => {};
+const filterInput = document.getElementById("filter-input");
+const list = document.getElementById("list");
+const div = document.getElementById("div");
+
+const renderLoading = () => {
+  div.innerHTML = '<p class="loader">Loading...</p>';
+};
+
+const renderError = () => {
+  div.innerHTML = '<p class="error">ERROR</p>';
+};
 
 const renderTabs = () => {
   const tabs = document.getElementById("tabs");
@@ -22,33 +34,64 @@ const renderTabs = () => {
     postsBtn.classList.add("active");
     todosBtn.classList.remove("active");
     usersBtn.classList.remove("active");
-    // renderPostsList(posts);
+    renderPostsList(posts);
+    activeTab = "posts";
   };
 
   todosBtn.onclick = () => {
     todosBtn.classList.add("active");
     postsBtn.classList.remove("active");
     usersBtn.classList.remove("active");
-    // renderTodosList(todos);
+    renderTodosList(todos);
+    activeTab = "todos";
   };
 
   usersBtn.onclick = () => {
     usersBtn.classList.add("active");
     todosBtn.classList.remove("active");
     postsBtn.classList.remove("active");
-    // renderUsersList(users);
+    renderUsersList(users);
+    activeTab = "users";
   };
 
   tabs.append(postsBtn, todosBtn, usersBtn);
 };
 
-const renderInput = () => {};
+const renderInput = () => {
+  const input = document.createElement("input");
+  input.oninput = (e) => {
+    if (activeTab === "posts") {
+      postsFilterValue = e.target.value;
+      renderPostsList(posts);
+    }
+  };
+};
 
-const renderPostsList = (posts) => {};
+const renderPostsList = (posts) => {
+  posts
+    .filter((post = post.title.includes(postsFilterValue)))
+    .slice(0, postsLimit)
+    .forEach((post) => {
+      ul.innerHTML += `<li>${post.title}</li>`;
+    });
+};
 
 const renderTodosList = (todos) => {};
 
-const renderUsersList = (users) => {};
+const renderUsersList = (users) => {
+  list.innerHTML = "";
+  const ul = document.createElement("ul");
+  ul.className = "users";
+
+  users.forEach((user) => {
+    ul.innerHTML += `
+          <li class="user">
+              info: ${user.name.title} ${user.name.first} ${user.name.last}
+          </li>
+      `;
+  });
+  list.append(ul);
+};
 
 const fetchs = [
   fetch("https://jsonplaceholder.typicode.com/posts"),
@@ -57,7 +100,7 @@ const fetchs = [
 ];
 
 const fetchData = () => {
-  // renderLoading()
+  renderLoading();
 
   Promise.allSettled(fetchs)
     .then((res) => Promise.all(res.map(({ value }) => value.json())))
@@ -67,11 +110,11 @@ const fetchData = () => {
       users = usersData;
 
       renderTabs();
-      // renderInput()
-      // renderPostList(postsData)
+      renderInput();
+      renderPostList(postsData);
     })
     .catch(() => {
-      // renderError()
+      renderError();
     });
 };
 
